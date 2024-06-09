@@ -6,6 +6,15 @@
   <title>{{title}}</title>
   <!-- Bootstrap CSS -->
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .bg-success-subtle {
+      background-color: rgba(40, 167, 69, 0.2); /* 예시로 연한 초록색 배경 */
+    }
+
+    .bg-danger-subtle {
+      background-color: rgba(220, 53, 69, 0.2); /* 예시로 연한 빨간색 배경 */
+    }
+  </style>
 </head>
 
 <!--게시글-->
@@ -21,12 +30,21 @@
     <div class="card-body">
       <h5 class="card-title">{{title}}</h5>
       <p class="card-text">{{content}}</p>
+      <!-- 칭찬 / 비난 -->
+     {{#if (eq category "praise")}}
+      <button type="button" class="btn btn-success mb-1">칭찬</button>
+     {{else if (eq category "blame")}}
+     <button type="button" class="btn btn-danger mb-1">비난</button>
+     {{/if}}
     </div>
   </div>
+
   <div style="height: 5%;"></div>
+
+  <!--수정 삭제 영역-->
   <div class="mb-4">
-    <button class="btn btn-primary btn-sm ml-2" onclick="modifyPost('{{_id}}')">수정</button>
-    <button class="btn btn-danger btn-sm ml-2" onclick="deletePost('{{_id}}')">삭제</button>
+    <button class="btn btn-outline-secondary btn-sm ml-2" onclick="modifyPost('{{_id}}')">수정</button>
+    <button class="btn btn-outline-secondary btn-sm ml-2" onclick="deletePost('{{_id}}')">삭제</button>
   </div>
   <div style="height: 5%;"></div>
 
@@ -46,9 +64,15 @@
         <button class="btn btn-danger btn-sm ml-2" onclick="deleteComment('{{../_id}}', '{{idx}}')">삭제</button>
         {{/if}}
       </div>
-      <div class="border border-dark-subtle p-2" style="--bs-border-opacity: .5;">
+      {{#if (eq ../category "praise")}}
+      <div class="border border-success bg-success-subtle p-2" style="--bs-border-opacity: .5;">
         <pre>{{comment}}</pre>
       </div>
+      {{else if (eq ../category "blame")}}
+      <div class="border border-danger bg-danger-subtle p-2" style="--bs-border-opacity: .5;">
+        <pre>{{comment}}</pre>
+      </div>
+      {{/if}}
     </div>
     {{/each}}
   </section>
@@ -59,7 +83,7 @@
     <form method="post" action="/write-comment" class="needs-validation" novalidate>
       <input type="hidden" name="id" value="{{_id}}" />
       <input type="hidden" name="name" value="{{name}}" />
-      
+
       <div class="form-group">
         <textarea class="form-control" name="comment" cols="40" rows="3" placeholder="댓글을 입력해주세요." required></textarea>
         <div class="invalid-feedback">
@@ -69,7 +93,7 @@
       <button class="btn btn-primary">댓글 쓰기</button>
     </form>
   </section>
-{{/with}}
+  {{/with}}
   <footer class="mt-5">
     <div>
       <a href="/" class="btn btn-secondary">목록으로</a>
@@ -85,12 +109,12 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
   <script>
-    (function() {
+    (function () {
       'use strict';
-      window.addEventListener('load', function() {
+      window.addEventListener('load', function () {
         var forms = document.getElementsByClassName('needs-validation');
-        Array.prototype.filter.call(forms, function(form) {
-          form.addEventListener('submit', function(event) {
+        var validation = Array.prototype.filter.call(forms, function (form) {
+          form.addEventListener('submit', function (event) {
             if (form.checkValidity() === false) {
               event.preventDefault();
               event.stopPropagation();
@@ -127,22 +151,27 @@
       if (!confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
         return;
       }
-      
-      const result = await fetch("/delete", {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: postId })
-      });
 
-      const data = await result.json();
-      if (!data.isSuccess) {
-        alert("삭제할 수 없습니다.");
-        return;
+      try {
+        const result = await fetch("/delete", {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id: postId })
+        });
+
+        const data = await result.json();
+        if (!data.isSuccess) {
+          alert("삭제할 수 없습니다.");
+          return;
+        }
+
+        document.location = "/";
+      } catch (error) {
+        alert('An error occurred while trying to delete the post.');
+        console.error(error);
       }
-
-      document.location = "/";
     }
 
     async function deleteComment(postId, idx) {
@@ -150,22 +179,27 @@
         return;
       }
 
-      const result = await fetch("/delete-comment", {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: postId, idx })
-      });
+      try {
+        const result = await fetch("/delete-comment", {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id: postId, idx })
+        });
 
-      const data = await result.json();
-      if (!data.isSuccess) {
-        alert("삭제할 수 없습니다.");
-        return;
+        const data = await result.json();
+        if (!data.isSuccess) {
+          alert("삭제할 수 없습니다.");
+          return;
+        }
+
+        alert("삭제되었습니다.");
+        document.location.reload();
+      } catch (error) {
+        alert('An error occurred while trying to delete the comment.');
+        console.error(error);
       }
-
-      alert("삭제되었습니다.");
-      document.location.reload();
     }
   </script>
 

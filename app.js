@@ -109,9 +109,11 @@ app.get("/write", isAuthenticated, (req, res) => {
 // 글쓰기 처리
 app.post("/write", isAuthenticated, async (req, res) => {
   const post = req.body;
+  post.category = req.body.category; // 선택된 라디오 버튼 값 추가
   const result = await postService.writePost(collection, post);
   res.redirect(`/detail/${result.insertedId}`);
 });
+
 
 // 게시글 상세 페이지
 app.get("/detail/:id", isAuthenticated, async (req, res) => {
@@ -164,7 +166,7 @@ app.get("/modify/:id", isAuthenticated, async (req, res) => {
 // 게시글 수정 처리
 app.post("/modify", isAuthenticated, async (req, res) => {
   try {
-    const { id, title, content } = req.body;
+    const { id, title, content, category } = req.body;
     const post = await postService.getPostById(collection, id);
     if (!post) {
       return res.status(404).json({ error: 'Post not found' });
@@ -172,13 +174,14 @@ app.post("/modify", isAuthenticated, async (req, res) => {
     if (post.writer.toString() !== req.session.username.toString()) {
       return res.status(403).json({ error: 'You are not authorized to modify this post' });
     }
-    await postService.updatePost(collection, id, { title, content, modifiedDt: new Date().toISOString() });
+    await postService.updatePost(collection, id, { title, content, category, modifiedDt: new Date().toISOString() });
     res.redirect(`/detail/${id}`);
   } catch (error) {
     console.error(error);
     res.status(400).json({ error: 'Invalid request' });
   }
 });
+
 
 // 게시글 삭제
 app.delete("/delete", isAuthenticated, async (req, res) => {
