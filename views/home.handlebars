@@ -14,10 +14,14 @@
       background-color: #28a745 !important;
       color: #fff !important;
     }
-
     .text-bg-danger {
       background-color: #dc3545 !important;
       color: #fff !important;
+    }
+    .horizontal-align {
+      display: flex;
+      align-items: center; /* 세로 축에서 가운데 정렬 */
+      justify-content: center; /* 가로 축에서 가운데 정렬 */
     }
   </style>
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
@@ -36,7 +40,10 @@
   </div>
 
   <!-- ❶ 타이틀 영역 -->
-  <h1 class="mb-4">{{title}}</h1>
+  <div class="horizontal-align mb-4">
+    <h1>{{title}}</h1>
+    <img src="img/onion.png" alt="양파"\>
+  </div>
 
   <!-- ❷ 검색어 영역  -->
   <div class="input-group mb-3">
