@@ -5,6 +5,12 @@
   <meta charset="utf-8" />
   <title>{{title}}</title>
   <!-- Bootstrap CSS -->
+  <style>
+    .text-bg-warning {
+      background-color: #ffc107 !important;
+      color: #212529 !important;
+    }
+  </style>
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
@@ -29,6 +35,15 @@
     <div class="input-group-append">
       <button class="btn btn-outline-secondary" type="button" onclick="location.href=`/?search=${document.getElementById('search').value}`">검색</button>
     </div>
+  </div>
+
+  <!--공지 영역-->
+  <div class="card text-bg-warning mb-3">
+  <div class="card-header">공지</div>
+  <div class="card-body">
+    <h5 class="card-title">칭찬양파 비난양파 컨셉의 스터디룸입니다.</h5>
+    <p class="card-text">칭찬과 비난은 훌륭한 동기부여가 됩니다.<br>칭찬 글엔 칭찬 달아주시고, 비난 글엔 가차없이 비난해주세요.</p>
+  </div>
   </div>
 
   <!-- ❸ 글쓰기 페이지 이동 링크  -->
