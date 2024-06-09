@@ -42,7 +42,7 @@
   <div style="height: 5%;"></div>
 
   <!--수정 삭제 영역-->
-  <div class="mb-4">
+  <div class="mb-3">
     <button class="btn btn-outline-secondary btn-sm ml-2" onclick="modifyPost('{{_id}}')">수정</button>
     <button class="btn btn-outline-secondary btn-sm ml-2" onclick="deletePost('{{_id}}')">삭제</button>
   </div>
@@ -61,7 +61,7 @@
       <div class="mb-1">
         작성일시 : {{dateString createdDt}}
         {{#if (eq ../user.id writerId)}}
-        <button class="btn btn-danger btn-sm ml-2" onclick="deleteComment('{{../_id}}', '{{idx}}')">삭제</button>
+        <button class="btn btn-outline-secondary btn-sm ml-2" onclick="deleteComment('{{../_id}}', '{{idx}}')">삭제</button>
         {{/if}}
       </div>
       {{#if (eq ../category "praise")}}
