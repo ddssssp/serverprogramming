@@ -10,6 +10,15 @@
       background-color: #ffc107 !important;
       color: #212529 !important;
     }
+    .text-bg-success {
+      background-color: #28a745 !important;
+      color: #fff !important;
+    }
+
+    .text-bg-danger {
+      background-color: #dc3545 !important;
+      color: #fff !important;
+    }
   </style>
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -65,7 +74,11 @@
       <tbody>
         {{#each posts}}
         <tr>
-          <td><a href="/detail/{{_id}}">{{title}}</a></td>
+          {{#if (eq category "praise")}}
+          <td><a href="/detail/{{_id}}">{{title}}  </a><span class="badge text-bg-success">칭찬</span></td>
+          {{else if (eq category "blame")}}
+          <td><a href="/detail/{{_id}}">{{title}}  </a><span class="badge text-bg-danger">비난</span></td>
+          {{/if}}
           <td>{{writer}}</td>
           <td>{{hits}}</td>
           <td>{{dateString createdDt}}</td>
