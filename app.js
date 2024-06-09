@@ -69,9 +69,10 @@ app.post("/login", async (req, res) => {
     req.session.username = user.username;
     res.redirect("/");
   } else {
-    res.redirect("/login");
+    res.status(401).send('로그인 실패. 사용자 이름 또는 비밀번호를 확인해주세요.');
   }
 });
+
 
 // 로그아웃 처리
 app.get("/logout", (req, res) => {
@@ -114,7 +115,6 @@ app.post("/write", isAuthenticated, async (req, res) => {
   res.redirect(`/detail/${result.insertedId}`);
 });
 
-
 // 게시글 상세 페이지
 app.get("/detail/:id", isAuthenticated, async (req, res) => {
   const result = await postService.getDetailPost(collection, req.params.id);
@@ -128,18 +128,6 @@ app.get("/detail/:id", isAuthenticated, async (req, res) => {
 });
 });
 
-// 비밀번호 확인 API
-app.post("/check-password", isAuthenticated, async (req, res) => {
-  const { id, password } = req.body;
-  const post = await postService.getPostByIdAndPassword(collection, { id, password });
-
-  if (!post) {
-    return res.status(404).json({ isExist: false });
-  } else {
-    return res.json({ isExist: true });
-  }
-});
-
 // 수정 페이지
 app.get("/modify/:id", isAuthenticated, async (req, res) => {
   const post = await postService.getPostById(collection, req.params.id);
@@ -150,11 +138,8 @@ app.get("/modify/:id", isAuthenticated, async (req, res) => {
 app.get("/modify/:id", isAuthenticated, async (req, res) => {
   try {
     const post = await postService.getPostById(collection, req.params.id);
-    if (!post) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
     if (post.writer.toString() !== req.session.username.toString()) {
-      return res.status(403).json({ error: 'You are not authorized to modify this post' });
+      return res.status(403).json({ error: '수정 권한이 없습니다.' });
     }
     res.render("write", { title: "스터디룸", mode: "modify", post, user: { id: req.session.userId, username: req.session.username } });
   } catch (error) {
@@ -168,11 +153,8 @@ app.post("/modify", isAuthenticated, async (req, res) => {
   try {
     const { id, title, content, category } = req.body;
     const post = await postService.getPostById(collection, id);
-    if (!post) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
     if (post.writer.toString() !== req.session.username.toString()) {
-      return res.status(403).json({ error: 'You are not authorized to modify this post' });
+      return res.status(403).json({ error: '수정 권한이 없습니다.' });
     }
     await postService.updatePost(collection, id, { title, content, category, modifiedDt: new Date().toISOString() });
     res.redirect(`/detail/${id}`);
@@ -182,21 +164,11 @@ app.post("/modify", isAuthenticated, async (req, res) => {
   }
 });
 
-
 // 게시글 삭제
 app.delete("/delete", isAuthenticated, async (req, res) => {
   try {
     const { id } = req.body;
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: 'Invalid ObjectId' });
-    }
     const post = await postService.getPostById(collection, id);
-    if (!post) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
-    if (post.writer.toString() !== req.session.username.toString()) {
-      return res.status(403).json({ error: 'You are not authorized to delete this comment' });
-    }
     await collection.deleteOne({ _id: ObjectId(id) });
     res.json({ isSuccess: true });
   } catch (error) {
@@ -204,7 +176,6 @@ app.delete("/delete", isAuthenticated, async (req, res) => {
     res.json({ isSuccess: false });
   }
 });
-
 
 // 댓글 추가
 app.post("/write-comment", isAuthenticated, async (req, res) => {
@@ -240,23 +211,8 @@ app.post("/write-comment", isAuthenticated, async (req, res) => {
 app.delete("/delete-comment", isAuthenticated, async (req, res) => {
   try {
     const { id, idx } = req.body;
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: 'Invalid ObjectId' });
-    }
-
     const post = await collection.findOne({ _id: ObjectId(id), "comments.idx": parseInt(idx) }, postService.projectionOption);
-    if (!post) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
-
     const comment = post.comments.find(comment => comment.idx === parseInt(idx));
-    if (!comment) {
-      return res.status(404).json({ error: 'Comment not found' });
-    }
-    if (comment.name.toString() !== req.session.username.toString()) {
-      return res.status(403).json({ error: 'You are not authorized to delete this comment' });
-    }
-
     post.comments = post.comments.filter(comment => comment.idx !== parseInt(idx));
     await postService.updatePost(collection, id, post);
     res.json({ isSuccess: true });
