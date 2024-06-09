@@ -265,3 +265,15 @@ app.delete("/delete-comment", isAuthenticated, async (req, res) => {
     res.json({ isSuccess: false });
   }
 });
+
+// 랭킹 페이지
+app.get('/ranking', async (req, res) => {
+  try {
+    const ranking_P = await postService.getPraiseRanking(collection);
+    const ranking_B = await postService.getBlameRanking(collection);
+    res.render('ranking', { title: '양파 키우기', ranking_P, ranking_B });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});

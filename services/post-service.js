@@ -60,6 +60,29 @@ async function updatePost(collection, id, post) {
   return await collection.updateOne({ _id: ObjectId(id) }, toUpdatePost);
 }
 
+// 양파 랭킹 시스템
+async function getPraiseRanking(collection) {
+  const pipeline = [
+    { $match: { category: 'praise' } },
+    { $group: { _id: '$writer', count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
+    { $limit: 10 }
+  ];
+  const result = await collection.aggregate(pipeline).toArray();
+  return result;
+}
+
+async function getBlameRanking(collection) {
+  const pipeline = [
+    { $match: { category: 'blame' } },
+    { $group: { _id: '$writer', count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
+    { $limit: 10 }
+  ];
+  const result = await collection.aggregate(pipeline).toArray();
+  return result;
+}
+
 module.exports = {
   list,
   writePost,
@@ -67,4 +90,6 @@ module.exports = {
   getPostById,
   getPostByIdAndPassword,
   updatePost,
+  getPraiseRanking,
+  getBlameRanking,
 };
