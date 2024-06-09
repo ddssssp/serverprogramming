@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>{{title}}</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<!--게시글-->
+<body class="container mt-5">
+  <h1 class="mb-4">{{title}}</h1>
+  {{#with post}} <!-- post 객체를 쉽게 사용하도록 with로 감싸기 -->
+
+  <div class="card">
+    <div class="card-header">
+      {{writer}}
+      <h6>조회수 : {{hits}} | 작성일시 : {{dateString createdDt}}</h6>
+    </div>
+    <div class="card-body">
+      <h5 class="card-title">{{title}}</h5>
+      <p class="card-text">{{content}}</p>
+    </div>
+  </div>
+  <div style="height: 5%;"></div>
+  <div class="mb-4">
+    <button class="btn btn-primary btn-sm ml-2" onclick="modifyPost('{{_id}}')">수정</button>
+    <button class="btn btn-danger btn-sm ml-2" onclick="deletePost('{{_id}}')">삭제</button>
+  </div>
+  <div style="height: 5%;"></div>
+
+  <section>
+    <div class="mb-3">
+      <h6>{{lengthOfList comments}}개의 댓글이 있습니다.</h6>
+    </div>
+
+    {{#each comments}}
+    <div class="mb-3">
+      <div class="mb-1">
+        작성자 : <b>{{name}}</b>
+      </div>
+      <div class="mb-1">
+        작성일시 : {{dateString createdDt}}
+        {{#if (eq ../user.id writerId)}}
+        <button class="btn btn-danger btn-sm ml-2" onclick="deleteComment('{{../_id}}', '{{idx}}')">삭제</button>
+        {{/if}}
+      </div>
+      <div class="border border-dark-subtle p-2" style="--bs-border-opacity: .5;">
+        <pre>{{comment}}</pre>
+      </div>
+    </div>
+    {{/each}}
+  </section>
+
+  <div style="height: 5%;"></div>
+
+  <section class="mb-4">
+    <form method="post" action="/write-comment" class="needs-validation" novalidate>
+      <input type="hidden" name="id" value="{{_id}}" />
+      <input type="hidden" name="name" value="{{name}}" />
+      
+      <div class="form-group">
+        <textarea class="form-control" name="comment" cols="40" rows="3" placeholder="댓글을 입력해주세요." required></textarea>
+        <div class="invalid-feedback">
+          댓글을 입력해주세요.
+        </div>
+      </div>
+      <button class="btn btn-primary">댓글 쓰기</button>
+    </form>
+  </section>
+{{/with}}
+  <footer class="mt-5">
+    <div>
+      <a href="/" class="btn btn-secondary">목록으로</a>
+    </div>
+  </footer>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <!-- Handlebars -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.6/handlebars.min.js"></script>
+  <!-- Bootstrap JS and dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    (function() {
+      'use strict';
+      window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        Array.prototype.filter.call(forms, function(form) {
+          form.addEventListener('submit', function(event) {
+            if (form.checkValidity() === false) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+          }, false);
+        });
+      }, false);
+    })();
+
+    async function modifyPost(postId) {
+      try {
+        const result = await fetch(`/modify/${postId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!result.ok) {
+          const data = await result.json();
+          alert(data.error);
+          return;
+        }
+
+        document.location = `/modify/${postId}`;
+      } catch (error) {
+        alert('An error occurred while trying to modify the post.');
+        console.error(error);
+      }
+    }
+
+    async function deletePost(postId) {
+      if (!confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
+        return;
+      }
+      
+      const result = await fetch("/delete", {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: postId })
+      });
+
+      const data = await result.json();
+      if (!data.isSuccess) {
+        alert("삭제할 수 없습니다.");
+        return;
+      }
+
+      document.location = "/";
+    }
+
+    async function deleteComment(postId, idx) {
+      if (!confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
+        return;
+      }
+
+      const result = await fetch("/delete-comment", {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: postId, idx })
+      });
+
+      const data = await result.json();
+      if (!data.isSuccess) {
+        alert("삭제할 수 없습니다.");
+        return;
+      }
+
+      alert("삭제되었습니다.");
+      document.location.reload();
+    }
+  </script>
+
+</body>
+
+</html>

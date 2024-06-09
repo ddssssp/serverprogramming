@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>{{title}}</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="container mt-5">
+  <!-- ❶ mode에 따라 문구 변경 -->
+  <h1 class="mb-4">[{{title}}] 글 {{#if (eq mode "create")}}작성{{else}}수정{{/if}}</h1>
+  <div>
+    <!-- ❷ mode에 따라 폼이 반영되는 URL 변경 -->
+    <form name="boardForm" method="post" class="needs-validation" novalidate {{#if (eq mode "create" )}}action="/write" {{else}}action="/modify" {{/if}}>
+      <!-- ❸ 수정 모드인 때는 id값을 폼통해 전송  -->
+      {{#if (eq mode "modify")}}
+      <input type="hidden" name="id" value="{{post._id}}" />
+      {{/if}}
+
+      <!-- ❹ 수정 모드인 경우 제목을 넣어줍니다.  -->
+      <div class="form-group">
+        <label for="title">제목</label>
+        <input type="text" class="form-control" id="title" name="title" placeholder="제목을 넣어주세요" value="{{post.title}}" required />
+        <div class="invalid-feedback">
+          제목을 입력해주세요.
+        </div>
+      </div>
+      <input type="hidden" id="writer" name="writer" value="{{user.username}}" />
+      <!-- ❺ 수정 모드인 경우 이름을 넣어줍니다.  -->
+      <!--<div class="form-group">
+        <label for="writer">이름</label>
+        <input type="text" class="form-control" id="writer" name="writer" placeholder="이름을 넣어주세요" value="{{post.writer}}" required />
+        <div class="invalid-feedback">
+          이름을 입력해주세요.
+        </div>
+      </div>-->
+
+      <!--<div class="form-group">
+        <label for="password">비밀번호</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="비밀번호를 넣어주세요" required />
+        <div class="invalid-feedback">
+          비밀번호를 입력해주세요.
+        </div>
+      </div> -->
+
+      <!-- ❻ 수정 모드 인 경우 본문에 내용을 채워줍니다. -->
+      <div class="form-group">
+        <label for="content">본문을 입력하세요</label>
+        <textarea class="form-control" id="content" name="content" placeholder="본문" cols="50" rows="10" required>{{post.content}}</textarea>
+        <div class="invalid-feedback">
+          본문을 입력해주세요.
+        </div>
+      </div>
+      <!-- 버튼영역 -->
+      <div class="form-group">
+        <button type="submit" class="btn btn-primary">저장</button>
+        <button type="button" class="btn btn-secondary" onclick="location.href='/'">취소</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <!-- Handlebars -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.6/handlebars.min.js"></script>
+  <!-- Bootstrap JS and dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    // Bootstrap validation script
+    (function () {
+      'use strict';
+      window.addEventListener('load', function () {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function (form) {
+          form.addEventListener('submit', function (event) {
+            if (form.checkValidity() === false) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+          }, false);
+        });
+      }, false);
+    })();
+  </script>
+</body>
+</html>
+
